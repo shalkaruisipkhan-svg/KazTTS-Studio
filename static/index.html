@@ -40,14 +40,14 @@
 
             <!-- Мәзір түймелері -->
             <nav class="p-4 space-y-1.5">
-                <button class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-purple-300 border border-purple-500/20 rounded-xl transition-all">
-                    <i class="fa-solid fa-microphone-lines text-purple-400 text-base"></i>
-                    <span>Студия (Синтез)</span>
-                </button>
-                <button onclick="scrollToArchive()" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all">
-                    <i class="fa-solid fa-folder-open text-base"></i>
-                    <span>Менің жобаларым</span>
-                </button>
+                <button id="tabBtnStudio" onclick="switchTabScreen('studio')" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-purple-300 border border-purple-500/20 rounded-xl transition-all">
+        <i class="fa-solid fa-microphone-lines text-purple-400 text-base"></i>
+        <span>Студия (Синтез)</span>
+    </button>
+                <button id="tabBtnProjects" onclick="switchTabScreen('projects')" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all">
+        <i class="fa-solid fa-folder-open text-base"></i>
+        <span>Менің жобаларым</span>
+    </button>
             </nav>
         </div>
 
@@ -108,7 +108,7 @@
             </div>
         </header>
 
-        <div class="p-8 max-w-5xl w-full mx-auto space-y-6">
+        <div id="studioMainEditorBody" class="p-8 max-w-5xl w-full mx-auto space-y-6">
             <!-- Негізгі редактор карточкасы -->
             <div class="bg-[#121826] border border-[#1f293d] rounded-2xl p-6 glow">
                 <div class="flex items-center justify-between pb-3 border-b border-[#1f293d]/60 mb-4">
@@ -168,7 +168,45 @@
                 </div>
             </div>
         </div>
-    </main>
+    
+<!-- ══════════════ «МЕНІҢ ЖОБАЛАРЫМ» (СІЗ ТАҢДАҒАН МІНСІЗ НҰСҚА) ══════════════ -->
+
+<!-- ══════════════ «МЕНІҢ ЖОБАЛАРЫМ» (СІЗ ТАҢДАҒАН МІНСІЗ НҰСҚА) ══════════════ -->
+<div id="screen-projects" style="display:none; flex:1; width:100%; height:100%; overflow-y:auto; padding:32px 40px 120px 40px; box-sizing:border-box; flex-direction:column; gap:24px;">
+  
+  <!-- Заголовок раздела -->
+  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; border-bottom:1px solid #1E2330; padding-bottom:20px;">
+    <div>
+      <h1 style="font-size:24px; font-weight:800; color:#F1EEE8; margin:0; display:flex; align-items:center; gap:10px;">
+        <span>📁</span> Менің жобаларым
+      </h1>
+      <p style="font-size:13px; color:#8E97A8; margin:6px 0 0 0;">Генерацияланған барлық Master WAV және Stems ZIP аудиолар архиві</p>
+    </div>
+
+    <!-- Фильтры, поиск, сортировка -->
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div style="background:#0D1017; border:1px solid #232836; border-radius:12px; padding:4px; display:flex; gap:4px;">
+        <button id="fltAll" onclick="filterProjects('all')" style="padding:7px 14px; border-radius:8px; border:none; font-size:12px; font-weight:700; cursor:pointer; background:#A99BFF; color:#0A0C11;">Барлығы</button>
+        <button id="fltWav" onclick="filterProjects('wav')" style="padding:7px 14px; border-radius:8px; border:none; font-size:12px; font-weight:700; cursor:pointer; background:transparent; color:#8E97A8;">🎵 Master WAV</button>
+        <button id="fltZip" onclick="filterProjects('zip')" style="padding:7px 14px; border-radius:8px; border:none; font-size:12px; font-weight:700; cursor:pointer; background:transparent; color:#8E97A8;">📦 Stems ZIP</button>
+      </div>
+
+      <input type="text" id="projectSearch" oninput="renderProjectsList()" placeholder="Жобаны іздеу..." style="background:#0D1017; border:1px solid #232836; border-radius:10px; color:#F1EEE8; font-size:12px; padding:8px 14px; outline:none; width:160px;">
+      
+      <select id="projectSort" onchange="renderProjectsList()" style="background:#0D1017; border:1px solid #232836; color:#F1EEE8; padding:8px 14px; border-radius:10px; font-size:12px; font-weight:600; outline:none; cursor:pointer;">
+        <option value="newest">🕒 Ең жаңалары</option>
+        <option value="oldest">⏳ Ескілері</option>
+        <option value="chars">📝 Таңба санымен</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Контейнер для карточек -->
+  <div id="projectsContainer" style="display:flex; flex-direction:column; gap:14px; width:100%;"></div>
+
+</div>
+
+</main>
 
     <!-- 3. ОҢ ЖАҚ ИНСПЕКТОР (VOICE & SETTINGS ПАНЕЛІ) -->
     <aside class="w-80 bg-[#121826] border-l border-[#1f293d] p-6 flex flex-col justify-between flex-shrink-0 overflow-y-auto">
@@ -266,170 +304,222 @@
     </div>
 
     <!-- СКРИПТТЕР -->
-    <script>
-        function insertTag(tag) {
-            const el = document.getElementById('ttsTextInput');
-            el.value += tag;
-            el.focus();
-        }
+    
 
-        function scrollToArchive() {
-            document.getElementById('archiveSection').scrollIntoView({ behavior: 'smooth' });
-        }
 
-        function logoutUser() {
-    localStorage.removeItem("unidauys_jwt");
-    window.location.href = "/";
-    return;
-            if(confirm('UniDauys Studio жүйесінен шығуды растайсыз ба?')) {
-                alert('Жүйеден сәтті шықтыңыз!');
-                location.reload();
-            }
-        }
 
-        async function synthesize() {
-            const txt = document.getElementById('ttsTextInput').value.trim();
-            if(!txt) return alert('Мәтін жазыңыз!');
 
-            const spk = document.querySelector('input[name="speaker"]:checked').value;
-            const btn = document.getElementById('synthBtn');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Синтезделуде...';
-            btn.disabled = true;
-
-            try {
-                const res = await fetch(`/api/synthesize?text=${encodeURIComponent(txt)}&speaker=${spk}`);
-                const data = await res.json();
-                if(data.audio_url) {
-                    const player = document.getElementById('audioPlayer');
-                    player.src = data.audio_url + '?t=' + Date.now();
-                    player.play();
-                    document.getElementById('dlMaster').href = player.src;
-                    document.getElementById('trackStatus').innerText = 'Сәтті дайындалды!';
-                    document.getElementById('trackTitle').innerText = txt.substring(0, 30) + '...';
-                }
-            } catch(e) {
-                alert('Синтез кезінде қате орын алды');
-            } finally {
-                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Сөзді синтездеу';
-                btn.disabled = false;
-            }
-        }
-    </script>
 
 <script>
-const GOOGLE_CLIENT_ID = "190507005188-09p3t7lq1kr8i0pmknso865rvc9n8g1m.apps.googleusercontent.com";
+function switchTabScreen(tab) {
+  const header = document.querySelector('main > header');
+  const studioBody = document.getElementById('studioMainEditorBody') || document.querySelector('main > .max-w-5xl');
+  const rightAside = document.querySelector('aside.w-80') || document.querySelector('aside:last-of-type');
+  const projectsScreen = document.getElementById('screen-projects');
 
-function getAuthHeader() {
-  const token = localStorage.getItem("unidauys_jwt");
-  return token ? { "Authorization": `Bearer ${token}` } : {};
-}
+  const btnStudio = document.getElementById('tabBtnStudio');
+  const btnProjects = document.getElementById('tabBtnProjects');
 
-// Google арқылы кіру жауабы
-async function handleCredentialResponse(response) {
-  try {
-    const res = await fetch('/api/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential: response.credential })
-    });
-    if (!res.ok) { const errBody = await res.text(); throw new Error(errBody); }
-    const data = await res.json();
-    localStorage.setItem("unidauys_jwt", data.token);
-    updateProfileUI(data.user);
-    loadServerData();
-  } catch (err) {
-    alert("Кіру кезінде қате: " + err.message);
-  }
-}
+  if (tab === 'studio') {
+    // 1. Студия элементтерін қайта көрсету
+    if (header) header.style.display = '';
+    if (studioBody) studioBody.style.display = '';
+    if (rightAside) rightAside.style.display = '';
+    if (projectsScreen) projectsScreen.style.display = 'none';
 
-function updateProfileUI(user) {
-  // Баланс индикаторын жаңарту
-  const balEl = document.querySelector('[class*="Баланс:"]') || document.body;
-  document.querySelectorAll('*').forEach(el => {
-    if (el.children.length === 0 && el.innerText && el.innerText.includes('таңба') && !el.innerText.includes('/')) {
-      el.innerText = `${user.balance.toLocaleString()} таңба`;
+    // 2. Батырма стилін жаңарту
+    if (btnStudio) {
+      btnStudio.className = "w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-purple-300 border border-purple-500/20 rounded-xl transition-all";
     }
-  });
-
-  // Creator блогын нақты аты-жөні мен суретіне ауыстыру
-  const profileContainer = document.querySelector('footer, aside, body');
-  const userTextNodes = document.querySelectorAll('*');
-  userTextNodes.forEach(el => {
-    if (el.children.length === 0 && el.innerText === 'Creator') {
-      el.innerText = user.name || "Creator";
+    if (btnProjects) {
+      btnProjects.className = "w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all border border-transparent";
     }
-  });
-}
-
-function initGoogleAuth() {
-  if (window.google) {
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleCredentialResponse
-    });
+  } else {
+    // 1. Студия мен оң жақ баптауларды жасыру
+    if (header) header.style.display = 'none';
+    if (studioBody) studioBody.style.display = 'none';
+    if (rightAside) rightAside.style.display = 'none';
     
-    // Сол жақтағы Creator блогын басқанда Google терезесі ашылатын ету
-    const bottomProfile = document.querySelector('.fa-arrow-right-from-bracket')?.parentElement || document.body;
-    document.querySelectorAll('*').forEach(el => {
-      if (el.innerText && el.innerText.includes('Creator') && el.children.length < 5) {
-        el.style.cursor = "pointer";
-        el.onclick = () => google.accounts.id.prompt();
-      }
-    });
-  }
-}
-
-async function loadServerData() {
-  try {
-    const res = await fetch('/api/user/info', { headers: getAuthHeader() });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data.is_authenticated) {
-      updateProfileUI(data.user);
+    // 2. Менің жобаларым архивін толық кеңістікке ашу
+    if (projectsScreen) {
+      projectsScreen.style.display = 'flex';
+      if (typeof loadProjects === 'function') loadProjects();
     }
-  } catch (e) {
-    console.error(e);
+
+    // 3. Батырма стилін жаңарту
+    if (btnProjects) {
+      btnProjects.className = "w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-purple-300 border border-purple-500/20 rounded-xl transition-all";
+    }
+    if (btnStudio) {
+      btnStudio.className = "w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all border border-transparent";
+    }
   }
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(initGoogleAuth, 1000);
-  loadServerData();
-});
 </script>
 
+
 <script>
-async function syncUserInfoOnce() {
+let projectsData = [];
+let currentFilter = 'all';
+
+// 1. СҮЗГІ ТАҢДАУ ЖӘНЕ КНОПКА ТҮСІН АУЫСТЫРУ
+function filterProjects(type) {
+  currentFilter = type;
+  
+  const buttons = {
+    'all': document.getElementById('fltAll'),
+    'wav': document.getElementById('fltWav'),
+    'zip': document.getElementById('fltZip')
+  };
+
+  for (const [key, btn] of Object.entries(buttons)) {
+    if (!btn) continue;
+    if (key === type) {
+      btn.style.background = '#A99BFF';
+      btn.style.color = '#0A0C11';
+      btn.style.fontWeight = '700';
+    } else {
+      btn.style.background = 'transparent';
+      btn.style.color = '#8E97A8';
+      btn.style.fontWeight = '500';
+    }
+  }
+
+  renderProjectsList();
+}
+
+// 2. БАЗАДАН ЖОБАЛАРДЫ ТАРТУ
+async function loadProjects() {
   const token = localStorage.getItem('unidauys_jwt');
-  if (!token) return;
   try {
-    const res = await fetch('/api/user/info', {
+    const res = await fetch('/api/projects', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
-    if (!res.ok) return;
-    const d = await res.json();
-    
-    const nameEl = document.getElementById('uProfileName');
-    const emailEl = document.getElementById('uProfileEmail');
-    const avatarEl = document.getElementById('uAvatarCircle');
-    const balEl = document.getElementById('cardBalanceVal');
-    
-    const displayName = d.name || d.username || (d.email ? d.email.split('@')[0] : 'Shalkar');
-    if (nameEl) nameEl.textContent = displayName;
-    if (emailEl) emailEl.textContent = d.email || '';
-    if (avatarEl && displayName) avatarEl.textContent = displayName.charAt(0).toUpperCase();
-    if (balEl && d.balance !== undefined) {
-      balEl.textContent = Number(d.balance).toLocaleString() + ' таңба';
+    if (res.ok) {
+      const data = await res.json();
+      projectsData = data.projects || [];
+    } else {
+      projectsData = [];
     }
-  } catch(e) {}
+  } catch(e) {
+    projectsData = [];
+  }
+  renderProjectsList();
 }
 
-function logoutUser() {
-  localStorage.removeItem('unidauys_jwt');
-  window.location.href = '/';
+// 3. ІЗДЕУ, СҰРЫПТАУ ЖӘНЕ КАРТОЧКАЛАРДЫ ШЫҒАРУ
+function renderProjectsList() {
+  const container = document.getElementById('projectsContainer');
+  if (!container) return;
+
+  const sort = document.getElementById('projectSort')?.value || 'newest';
+  const q = (document.getElementById('projectSearch')?.value || '').toLowerCase().trim();
+
+  let list = [...projectsData];
+
+  // Іздеу сүзгісі
+  if (q) {
+    list = list.filter(p => 
+      (p.title && p.title.toLowerCase().includes(q)) || 
+      (p.text_content && p.text_content.toLowerCase().includes(q))
+    );
+  }
+
+  // Түр сүзгісі (WAV / ZIP)
+  if (currentFilter === 'wav') {
+    list = list.filter(p => p.master_url);
+  } else if (currentFilter === 'zip') {
+    list = list.filter(p => p.stems_url);
+  }
+
+  // Сұрыптау
+  if (sort === 'newest') {
+    list.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  } else if (sort === 'oldest') {
+    list.sort((a,b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+  } else if (sort === 'chars') {
+    list.sort((a,b) => (b.char_count || 0) - (a.char_count || 0));
+  }
+
+  // Жоба жоқ болса немесе іздеу нәтижесі бос болса
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div style="background:#0D1017; border:1px dashed #232836; border-radius:20px; padding:60px 24px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; margin-top:16px;">
+        <div style="width:56px; height:56px; border-radius:16px; background:rgba(169,155,255,0.1); display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:14px; border:1px solid rgba(169,155,255,0.2);">
+          ${q ? '🔍' : '📁'}
+        </div>
+        <h3 style="font-size:16px; font-weight:800; color:#F1EEE8; margin:0 0 6px 0;">
+          ${q ? 'Іздеу бойынша ештеңе табылмады' : 'Әзірге жасалған жобалар жоқ'}
+        </h3>
+        <p style="font-size:13px; color:#8E97A8; max-width:360px; line-height:1.5; margin:0 0 18px 0;">
+          ${q ? 'Басқа сөз жазып көріңіз немесе сүзгіні тазартыңыз.' : 'Мәтінді синтездеген кезде аудио файлдар осы тізімге автоматты түрде жиналады.'}
+        </p>
+        ${!q ? `
+        <button onclick="switchTabScreen('studio')" style="background:linear-gradient(135deg,#A99BFF,#8B5CF6); color:#0A0C11; border:none; border-radius:12px; padding:10px 20px; font-size:13px; font-weight:800; cursor:pointer;">
+          🎙️ Студияда дауыстау жасау
+        </button>` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  const spkBadge = {
+    0: '<span style="color:#4ED8B8;background:rgba(78,216,184,0.1);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">M1 Азамат</span>',
+    1: '<span style="color:#FF7DBE;background:rgba(255,125,190,0.1);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">F1 Айнұр</span>',
+    2: '<span style="color:#A99BFF;background:rgba(169,155,255,0.1);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">M2 Баяндаушы</span>'
+  };
+
+  container.innerHTML = list.map(p => `
+    <div style="background:#0D1017; border:1px solid #232836; border-radius:16px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; transition:all 0.15s;" onmouseover="this.style.borderColor='#384256'" onmouseout="this.style.borderColor='#232836'">
+      <div style="display:flex; align-items:center; gap:14px; min-width:280px; flex:1;">
+        <button onclick="playProjectAudio('${p.master_url}')" title="Ойнату" style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#A99BFF,#8B5CF6); border:none; color:#0A0C11; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;">
+          ▶
+        </button>
+        <div style="overflow:hidden;">
+          <div style="font-size:14px; font-weight:700; color:#F1EEE8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            ${p.title || 'Атаусыз жоба'}
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+            ${spkBadge[p.speaker_id] || spkBadge[2]}
+            <span style="font-size:12px; color:#8E97A8;">📝 ${p.char_count || 0} таңба</span>
+            <span style="font-size:11px; color:#6C7584;">• ${p.created_at || ''}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+        <button onclick="reopenProjectText('${encodeURIComponent(p.text_content || '')}')" title="Студияда ашу" style="background:#05070A; border:1px solid #232836; color:#8E97A8; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer;">
+          ✍️ Ашу
+        </button>
+        <a href="${p.master_url}" download style="background:#171B24; border:1px solid #2E3444; color:#F1EEE8; padding:8px 14px; border-radius:10px; font-size:12px; font-weight:700; text-decoration:none;">
+          🎵 WAV ⬇
+        </a>
+        ${p.stems_url ? `
+          <a href="${p.stems_url}" download style="background:rgba(78,216,184,0.12); border:1px solid #4ED8B8; color:#4ED8B8; padding:8px 14px; border-radius:10px; font-size:12px; font-weight:700; text-decoration:none;">
+            📦 ZIP ⬇
+          </a>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
 }
 
-window.addEventListener('DOMContentLoaded', syncUserInfoOnce);
+function playProjectAudio(url) {
+  const p = document.querySelector('audio');
+  if (p) { p.src = url; p.play(); }
+}
+
+function reopenProjectText(encText) {
+  const t = decodeURIComponent(encText);
+  const ta = document.querySelector('textarea');
+  if (ta) {
+    ta.value = t;
+    ta.dispatchEvent(new Event('input'));
+  }
+  if (typeof switchTabScreen === 'function') {
+    switchTabScreen('studio');
+  }
+}
 </script>
 
 </body>
