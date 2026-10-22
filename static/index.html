@@ -13,6 +13,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #374151; }
         .glow { box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.25); }
     </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="bg-[#0b0f19] text-slate-100 flex h-screen overflow-hidden font-sans antialiased">
 
@@ -261,6 +262,9 @@
         }
 
         function logoutUser() {
+    localStorage.removeItem("unidauys_jwt");
+    window.location.href = "/";
+    return;
             if(confirm('UniDauys Studio жүйесінен шығуды растайсыз ба?')) {
                 alert('Жүйеден сәтті шықтыңыз!');
                 location.reload();
@@ -295,5 +299,88 @@
             }
         }
     </script>
+
+<script>
+const GOOGLE_CLIENT_ID = "190507005188-09p3t7lq1kr8i0pmknso865rvc9n8g1m.apps.googleusercontent.com";
+
+function getAuthHeader() {
+  const token = localStorage.getItem("unidauys_jwt");
+  return token ? { "Authorization": `Bearer ${token}` } : {};
+}
+
+// Google арқылы кіру жауабы
+async function handleCredentialResponse(response) {
+  try {
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    });
+    if (!res.ok) { const errBody = await res.text(); throw new Error(errBody); }
+    const data = await res.json();
+    localStorage.setItem("unidauys_jwt", data.token);
+    updateProfileUI(data.user);
+    loadServerData();
+  } catch (err) {
+    alert("Кіру кезінде қате: " + err.message);
+  }
+}
+
+function updateProfileUI(user) {
+  // Баланс индикаторын жаңарту
+  const balEl = document.querySelector('[class*="Баланс:"]') || document.body;
+  document.querySelectorAll('*').forEach(el => {
+    if (el.children.length === 0 && el.innerText && el.innerText.includes('таңба') && !el.innerText.includes('/')) {
+      el.innerText = `${user.balance.toLocaleString()} таңба`;
+    }
+  });
+
+  // Creator блогын нақты аты-жөні мен суретіне ауыстыру
+  const profileContainer = document.querySelector('footer, aside, body');
+  const userTextNodes = document.querySelectorAll('*');
+  userTextNodes.forEach(el => {
+    if (el.children.length === 0 && el.innerText === 'Creator') {
+      el.innerText = user.name || "Creator";
+    }
+  });
+}
+
+function initGoogleAuth() {
+  if (window.google) {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleCredentialResponse
+    });
+    
+    // Сол жақтағы Creator блогын басқанда Google терезесі ашылатын ету
+    const bottomProfile = document.querySelector('.fa-arrow-right-from-bracket')?.parentElement || document.body;
+    document.querySelectorAll('*').forEach(el => {
+      if (el.innerText && el.innerText.includes('Creator') && el.children.length < 5) {
+        el.style.cursor = "pointer";
+        el.onclick = () => google.accounts.id.prompt();
+      }
+    });
+  }
+}
+
+async function loadServerData() {
+  try {
+    const res = await fetch('/api/user/info', { headers: getAuthHeader() });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.is_authenticated) {
+      updateProfileUI(data.user);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initGoogleAuth, 1000);
+  loadServerData();
+});
+</script>
 </body>
+
 </html>
