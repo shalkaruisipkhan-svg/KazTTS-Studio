@@ -52,31 +52,47 @@
         </div>
 
         <!-- Төменгі профиль және ШЫҒУ батырмасы -->
-        <div class="p-4 border-t border-[#1f293d] bg-slate-900/40">
-            <div class="flex items-center justify-between mb-3 px-1">
-                <div>
-                    <div class="text-[11px] text-slate-400 font-semibold">Баланс:</div>
-                    <div class="text-sm font-bold text-cyan-400" id="userBalanceDisplay">3 144 таңба</div>
-                </div>
-                <button class="text-xs bg-purple-600 hover:bg-purple-500 text-white font-medium px-2.5 py-1 rounded-lg transition-all">
-                    + Толтыру
-                </button>
+        
+    <!-- ════════ БІРТҰТАС USER + ТАРИФ + БАЛАНС КАРТОЧКАСЫ ════════ -->
+    <div id="unifiedUserCard" style="margin-top:auto;padding:12px;width:100%;box-sizing:border-box;">
+      <div style="background:#0D1017;border:1px solid #232836;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 24px -4px rgba(0,0,0,0.6);">
+        
+        <!-- 1-қатар: Аватар + Аты + Тариф + Шығу -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+            <div id="uAvatarCircle" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#A99BFF,#4ED8B8);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#0A0C11;flex-shrink:0;">
+              S
             </div>
-            <div class="flex items-center justify-between pt-2 border-t border-[#1f293d]/60">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-bold text-xs text-white">U</div>
-                    <div>
-                        <div class="text-xs font-semibold text-slate-200">Creator</div>
-                        <div class="text-[10px] text-slate-500">Pro план</div>
-                    </div>
-                </div>
-                <!-- ШЫҒУ БАТЫРМАСЫ -->
-                <button onclick="logoutUser()" title="Аккаунттан шығу" class="text-slate-400 hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition-all">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </button>
+            <div style="min-width:0;display:flex;align-items:center;gap:6px;overflow:hidden;">
+              <span id="uProfileName" style="font-size:13px;font-weight:700;color:#F1EEE8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Shalkar</span>
+              <span style="font-size:9px;font-weight:800;background:rgba(169,155,255,0.15);color:#A99BFF;border:1px solid rgba(169,155,255,0.3);padding:1px 6px;border-radius:999px;flex-shrink:0;">ТЕГІН</span>
             </div>
+          </div>
+          <button onclick="logoutUser()" title="Шығу" style="background:transparent;border:none;color:#A1A9B8;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;transition:color .15s;flex-shrink:0;" onmouseover="this.style.color='#FF7D6E'" onmouseout="this.style.color='#A1A9B8'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          </button>
         </div>
-    </aside>
+
+        <!-- 2-қатар: Электронды пошта -->
+        <div id="uProfileEmail" style="font-size:11px;color:#A1A9B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:2px;">
+          shalkaruisipkhan@gmail.com
+        </div>
+
+        <!-- 3-қатар: Баланс қалдығы + Толтыру батырмасы -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid #1E2330;">
+          <div style="min-width:0;">
+            <div style="font-size:10px;color:#7E8695;text-transform:uppercase;font-weight:700;letter-spacing:0.04em;">Баланс қалдығы</div>
+            <div id="cardBalanceVal" style="font-size:14px;font-weight:800;color:#4ED8B8;font-family:'JetBrains Mono',monospace;margin-top:2px;">3 144 таңба</div>
+          </div>
+          <button onclick="alert('Тарифтік жоспарлар мен баланс толтыру жақында қосылады!')" style="background:linear-gradient(135deg,#A99BFF,#8B5CF6);color:#0A0C11;border:none;border-radius:10px;padding:7px 12px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 2px 10px rgba(169,155,255,0.25);">
+            + Толтыру
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+</aside>
 
     <!-- 2. ОРТАЛЫҚ РЕДАКТОР ЖӘНЕ МҰРАҒАТ АЙМАҒЫ -->
     <main class="flex-1 flex flex-col h-screen overflow-y-auto pb-32">
@@ -381,6 +397,41 @@ window.addEventListener('DOMContentLoaded', () => {
   loadServerData();
 });
 </script>
+
+<script>
+async function syncUserInfoOnce() {
+  const token = localStorage.getItem('unidauys_jwt');
+  if (!token) return;
+  try {
+    const res = await fetch('/api/user/info', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) return;
+    const d = await res.json();
+    
+    const nameEl = document.getElementById('uProfileName');
+    const emailEl = document.getElementById('uProfileEmail');
+    const avatarEl = document.getElementById('uAvatarCircle');
+    const balEl = document.getElementById('cardBalanceVal');
+    
+    const displayName = d.name || d.username || (d.email ? d.email.split('@')[0] : 'Shalkar');
+    if (nameEl) nameEl.textContent = displayName;
+    if (emailEl) emailEl.textContent = d.email || '';
+    if (avatarEl && displayName) avatarEl.textContent = displayName.charAt(0).toUpperCase();
+    if (balEl && d.balance !== undefined) {
+      balEl.textContent = Number(d.balance).toLocaleString() + ' таңба';
+    }
+  } catch(e) {}
+}
+
+function logoutUser() {
+  localStorage.removeItem('unidauys_jwt');
+  window.location.href = '/';
+}
+
+window.addEventListener('DOMContentLoaded', syncUserInfoOnce);
+</script>
+
 </body>
 
 </html>
