@@ -7,30 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0b0f19; }
         ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #374151; }
         .glow { box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.25); }
     </style>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-[#0b0f19] text-slate-100 flex h-screen overflow-hidden font-sans antialiased">
+<body class="bg-[#0b0f19] text-slate-100 flex h-screen overflow-hidden font-sans">
 
-    <!-- 1. СОЛ ЖАҚ МӘЗІР (SIDEBAR) -->
+    <!-- 1. СОЛ ЖАҚ МӘЗІР -->
     <aside class="w-64 bg-[#121826] border-r border-[#1f293d] flex flex-col justify-between flex-shrink-0 z-20">
         <div>
-            <!-- 2B Sound Prism Логотипі -->
+            <!-- Логотип -->
             <div class="h-16 flex items-center px-6 border-b border-[#1f293d] gap-3">
-                <svg width="34" height="34" viewBox="0 0 80 80" fill="none" class="flex-shrink-0 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">
-                    <circle cx="40" cy="40" r="36" stroke="#2a334a" stroke-width="1.5" stroke-dasharray="3 3"/>
-                    <rect x="18" y="32" width="4" height="16" rx="2" fill="#06b6d4"/>
-                    <rect x="26" y="26" width="4" height="28" rx="2" fill="#0ea5e9"/>
-                    <rect x="50" y="26" width="4" height="28" rx="2" fill="#8b5cf6"/>
-                    <rect x="58" y="32" width="4" height="16" rx="2" fill="#c084fc"/>
-                    <polygon points="40,8 47,32 72,40 47,48 40,72 33,48 8,40 33,32" fill="#6366f1" stroke="#a855f7" stroke-width="1.5"/>
-                    <circle cx="40" cy="40" r="4" fill="#ffffff"/>
-                </svg>
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg">UD</div>
                 <div class="flex items-center gap-1">
                     <span class="font-extrabold text-xl text-white">Uni</span>
                     <span class="font-extrabold text-xl text-purple-400">Dauys</span>
@@ -38,490 +28,279 @@
                 </div>
             </div>
 
-            <!-- Мәзір түймелері -->
+            <!-- МӘЗІР БАТЫРМАЛАРЫ -->
             <nav class="p-4 space-y-1.5">
-                <button id="tabBtnStudio" onclick="switchTabScreen('studio')" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-purple-300 border border-purple-500/20 rounded-xl transition-all">
-        <i class="fa-solid fa-microphone-lines text-purple-400 text-base"></i>
-        <span>Студия (Синтез)</span>
-    </button>
-                <button id="tabBtnProjects" onclick="switchTabScreen('projects')" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all">
-        <i class="fa-solid fa-folder-open text-base"></i>
-        <span>Менің жобаларым</span>
-    </button>
+                <button id="btnTabStudio" onclick="switchNavTab('studio')" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-white border border-purple-500/30 rounded-xl transition-all">
+                    <i class="fa-solid fa-microphone-lines text-purple-400 text-base"></i>
+                    <span>Студия (Синтез)</span>
+                </button>
+                <button id="btnTabProjects" onclick="switchNavTab('projects')" class="w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl border border-transparent transition-all">
+                    <i class="fa-solid fa-folder-open text-base"></i>
+                    <span>Менің жобаларым</span>
+                </button>
             </nav>
         </div>
 
-        <!-- Төменгі профиль және ШЫҒУ батырмасы -->
-        
-    <!-- ════════ БІРТҰТАС USER + ТАРИФ + БАЛАНС КАРТОЧКАСЫ ════════ -->
-    <div id="unifiedUserCard" style="margin-top:auto;padding:12px;width:100%;box-sizing:border-box;">
-      <div style="background:#0D1017;border:1px solid #232836;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 24px -4px rgba(0,0,0,0.6);">
-        
-        <!-- 1-қатар: Аватар + Аты + Тариф + Шығу -->
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
-            <div id="uAvatarCircle" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#A99BFF,#4ED8B8);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#0A0C11;flex-shrink:0;">
-              S
-            </div>
-            <div style="min-width:0;display:flex;align-items:center;gap:6px;overflow:hidden;">
-              <span id="uProfileName" style="font-size:13px;font-weight:700;color:#F1EEE8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Shalkar</span>
-              <span style="font-size:9px;font-weight:800;background:rgba(169,155,255,0.15);color:#A99BFF;border:1px solid rgba(169,155,255,0.3);padding:1px 6px;border-radius:999px;flex-shrink:0;">ТЕГІН</span>
-            </div>
-          </div>
-          <button onclick="logoutUser()" title="Шығу" style="background:transparent;border:none;color:#A1A9B8;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;transition:color .15s;flex-shrink:0;" onmouseover="this.style.color='#FF7D6E'" onmouseout="this.style.color='#A1A9B8'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          </button>
-        </div>
-
-        <!-- 2-қатар: Электронды пошта -->
-        <div id="uProfileEmail" style="font-size:11px;color:#A1A9B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:2px;">
-          shalkaruisipkhan@gmail.com
-        </div>
-
-        <!-- 3-қатар: Баланс қалдығы + Толтыру батырмасы -->
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid #1E2330;">
-          <div style="min-width:0;">
-            <div style="font-size:10px;color:#7E8695;text-transform:uppercase;font-weight:700;letter-spacing:0.04em;">Баланс қалдығы</div>
-            <div id="cardBalanceVal" style="font-size:14px;font-weight:800;color:#4ED8B8;font-family:'JetBrains Mono',monospace;margin-top:2px;">3 144 таңба</div>
-          </div>
-          <button onclick="alert('Тарифтік жоспарлар мен баланс толтыру жақында қосылады!')" style="background:linear-gradient(135deg,#A99BFF,#8B5CF6);color:#0A0C11;border:none;border-radius:10px;padding:7px 12px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 2px 10px rgba(169,155,255,0.25);">
-            + Толтыру
-          </button>
-        </div>
-
-      </div>
-    </div>
-
-</aside>
-
-    <!-- 2. ОРТАЛЫҚ РЕДАКТОР ЖӘНЕ МҰРАҒАТ АЙМАҒЫ -->
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto pb-32">
-        <header class="h-16 border-b border-[#1f293d] px-8 flex items-center justify-between bg-[#0b0f19]/80 backdrop-blur sticky top-0 z-10">
-            <div class="flex items-center gap-3">
-                <i class="fa-regular fa-folder text-slate-400"></i>
-                <input type="text" id="projectTitle" value="Жаңа жоба (Ертегі)" class="bg-transparent text-sm font-semibold text-slate-200 border-b border-transparent hover:border-slate-700 focus:border-purple-500 outline-none px-1 py-0.5 transition-all">
-            </div>
-            <div class="flex items-center bg-slate-900 border border-[#1f293d] p-1 rounded-xl text-xs font-medium">
-                <button class="px-3 py-1.5 rounded-lg bg-purple-600 text-white font-semibold">
-                    🎭 AI Көпкейіпкерлі қойылым
-                </button>
-            </div>
-        </header>
-
-        <div id="studioMainEditorBody" class="p-8 max-w-5xl w-full mx-auto space-y-6">
-            <!-- Негізгі редактор карточкасы -->
-            <div class="bg-[#121826] border border-[#1f293d] rounded-2xl p-6 glow">
-                <div class="flex items-center justify-between pb-3 border-b border-[#1f293d]/60 mb-4">
-                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Дыбысталатын мәтін</label>
-                    <span class="text-xs text-slate-500" id="charCounter">0 / 10 000 таңба</span>
-                </div>
-
-                <!-- ISSAI үлгісіндегі Эмоция тегтері -->
-                <div class="flex flex-wrap items-center gap-2 mb-4">
-                    <span class="text-xs font-medium text-slate-400 mr-1">Эмоциялар:</span>
-                    <button onclick="insertTag(' (happy)')" class="text-xs bg-slate-800/80 hover:bg-purple-900/40 text-purple-300 border border-purple-500/20 px-3 py-1 rounded-full transition-all">
-                        😄 Қуаныш
-                    </button>
-                    <button onclick="insertTag(' (sad)')" class="text-xs bg-slate-800/80 hover:bg-blue-900/40 text-blue-300 border border-blue-500/20 px-3 py-1 rounded-full transition-all">
-                        😢 Мұң
-                    </button>
-                    <button onclick="insertTag(' (angry)')" class="text-xs bg-slate-800/80 hover:bg-red-900/40 text-red-300 border border-red-500/20 px-3 py-1 rounded-full transition-all">
-                        😡 Ашу
-                    </button>
-                    <button onclick="insertTag(' (surprise)')" class="text-xs bg-slate-800/80 hover:bg-amber-900/40 text-amber-300 border border-amber-500/20 px-3 py-1 rounded-full transition-all">
-                        😲 Таңданыс
-                    </button>
-                    <button onclick="insertTag(' ... ')" class="text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1 rounded-full transition-all">
-                        ⏸️ Кідіріс
-                    </button>
-                </div>
-
-                <!-- Мәтін өрісі -->
-                <textarea id="ttsTextInput" rows="8" 
-                    placeholder="Қазақ тілінде мәтін енгізіңіз... Мысалы: Алтынай қуана сөйледі: «Қарашы, табиғат қандай керемет!». Дүйсен мейірлене жымиды: «Бәрекелді, бұл нағыз сұлулық»." 
-                    class="w-full bg-slate-900/60 text-slate-100 text-base rounded-xl p-4 border border-[#1f293d] focus:border-purple-500 outline-none resize-none leading-relaxed transition-all"></textarea>
-
-                <div class="mt-4 flex items-center justify-between">
-                    <div class="text-xs text-slate-400">
-                        <i class="fa-solid fa-wand-magic-sparkles text-purple-400 mr-1.5"></i>
-                        Gemini AI режиссері кейіпкерлерді автоматты бөледі
-                    </div>
-                    <button id="synthBtn" onclick="synthesize()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2.5 shadow-lg shadow-purple-600/30 transition-all">
-                        <i class="fa-solid fa-bolt"></i>
-                        <span>Сөзді синтездеу</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Мұрағат блогы -->
-            <div id="archiveSection" class="mt-8">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-200 text-base flex items-center gap-2">
-                        <i class="fa-solid fa-clock-rotate-left text-purple-400"></i>
-                        Жақында жасалған аудиолар
-                    </h3>
-                </div>
-                <div id="projectsGrid" class="space-y-2">
-                    <div class="p-5 bg-[#121826] border border-[#1f293d] rounded-xl text-center text-slate-500 text-sm">
-                        Әзірге жасалған жобалар жоқ. Жоғарыдағы мәтінді толтырып, «Сөзді синтездеу» батырмасын басыңыз.
-                    </div>
-                </div>
-            </div>
-        </div>
-    
-<!-- ══════════════ «МЕНІҢ ЖОБАЛАРЫМ» (СІЗ ТАҢДАҒАН МІНСІЗ НҰСҚА) ══════════════ -->
-
-<!-- ══════════════ «МЕНІҢ ЖОБАЛАРЫМ» (СІЗ ТАҢДАҒАН МІНСІЗ НҰСҚА) ══════════════ -->
-<div id="screen-projects" style="display:none; flex:1; width:100%; height:100%; overflow-y:auto; padding:32px 40px 120px 40px; box-sizing:border-box; flex-direction:column; gap:24px;">
-  
-  <!-- Заголовок раздела -->
-  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; border-bottom:1px solid #1E2330; padding-bottom:20px;">
-    <div>
-      <h1 style="font-size:24px; font-weight:800; color:#F1EEE8; margin:0; display:flex; align-items:center; gap:10px;">
-        <span>📁</span> Менің жобаларым
-      </h1>
-      <p style="font-size:13px; color:#8E97A8; margin:6px 0 0 0;">Генерацияланған барлық Master WAV және Stems ZIP аудиолар архиві</p>
-    </div>
-
-    <!-- Фильтры, поиск, сортировка -->
-    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-      <div style="background:#0D1017; border:1px solid #232836; border-radius:12px; padding:4px; display:flex; gap:4px;">
-        <button id="fltAll" onclick="filterProjects('all')" style="padding:7px 14px; border-radius:8px; border:none; font-size:12px; font-weight:700; cursor:pointer; background:#A99BFF; color:#0A0C11;">Барлығы</button>
-        <button id="fltWav" onclick="filterProjects('wav')" style="padding:7px 14px; border-radius:8px; border:none; font-size:12px; font-weight:700; cursor:pointer; background:transparent; color:#8E97A8;">🎵 Master WAV</button>
-        <button id="fltZip" onclick="filterProjects('zip')" style="padding:7px 14px; border-radius:8px; border:none; font-size:12px; font-weight:700; cursor:pointer; background:transparent; color:#8E97A8;">📦 Stems ZIP</button>
-      </div>
-
-      <input type="text" id="projectSearch" oninput="renderProjectsList()" placeholder="Жобаны іздеу..." style="background:#0D1017; border:1px solid #232836; border-radius:10px; color:#F1EEE8; font-size:12px; padding:8px 14px; outline:none; width:160px;">
-      
-      <select id="projectSort" onchange="renderProjectsList()" style="background:#0D1017; border:1px solid #232836; color:#F1EEE8; padding:8px 14px; border-radius:10px; font-size:12px; font-weight:600; outline:none; cursor:pointer;">
-        <option value="newest">🕒 Ең жаңалары</option>
-        <option value="oldest">⏳ Ескілері</option>
-        <option value="chars">📝 Таңба санымен</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Контейнер для карточек -->
-  <div id="projectsContainer" style="display:flex; flex-direction:column; gap:14px; width:100%;"></div>
-
-</div>
-
-</main>
-
-    <!-- 3. ОҢ ЖАҚ ИНСПЕКТОР (VOICE & SETTINGS ПАНЕЛІ) -->
-    <aside class="w-80 bg-[#121826] border-l border-[#1f293d] p-6 flex flex-col justify-between flex-shrink-0 overflow-y-auto">
-        <div class="space-y-6">
-            <h3 class="font-bold text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-cyan-400"></i> Дауыс баптаулары
-            </h3>
-
-            <!-- Дикторлар тізімі -->
-            <div>
-                <label class="text-xs font-semibold text-slate-300 block mb-2">Негізгі диктор</label>
-                <div class="space-y-2">
-                    <label class="flex items-center justify-between p-3 rounded-xl border border-purple-500/40 bg-purple-950/20 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-purple-600/30 text-purple-300 flex items-center justify-center font-bold text-xs">M2</div>
-                            <div>
-                                <div class="text-xs font-bold text-white">Баяндаушы (M2)</div>
-                                <div class="text-[10px] text-slate-400">Сабырлы, қоңыр дауыс</div>
-                            </div>
-                        </div>
-                        <input type="radio" name="speaker" value="2" checked class="text-purple-600 focus:ring-0">
-                    </label>
-
-                    <label class="flex items-center justify-between p-3 rounded-xl border border-[#1f293d] bg-slate-900/40 hover:border-slate-700 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-cyan-600/30 text-cyan-300 flex items-center justify-center font-bold text-xs">F1</div>
-                            <div>
-                                <div class="text-xs font-bold text-white">Айнұр (F1)</div>
-                                <div class="text-[10px] text-slate-400">Нәзік әйел дауысы</div>
-                            </div>
-                        </div>
-                        <input type="radio" name="speaker" value="1" class="text-purple-600 focus:ring-0">
-                    </label>
-
-                    <label class="flex items-center justify-between p-3 rounded-xl border border-[#1f293d] bg-slate-900/40 hover:border-slate-700 cursor-pointer">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-blue-600/30 text-blue-300 flex items-center justify-center font-bold text-xs">M1</div>
-                            <div>
-                                <div class="text-xs font-bold text-white">Азамат (M1)</div>
-                                <div class="text-[10px] text-slate-400">Жігерлі ер адам</div>
-                            </div>
-                        </div>
-                        <input type="radio" name="speaker" value="0" class="text-purple-600 focus:ring-0">
-                    </label>
-                </div>
-            </div>
-
-            <!-- Жылдамдық пен сапа реттегіші -->
-            <div class="space-y-4 pt-4 border-t border-[#1f293d]">
+        <!-- Төменгі баланс және профиль -->
+        <div class="p-4 border-t border-[#1f293d] bg-slate-900/40">
+            <div class="flex items-center justify-between mb-3 px-1">
                 <div>
-                    <div class="flex justify-between text-xs font-medium mb-1.5">
-                        <span class="text-slate-300">Жылдамдық</span>
-                        <span class="text-purple-400" id="speedLabel">1.0x</span>
-                    </div>
-                    <input type="range" id="speedSlider" min="0.8" max="1.3" step="0.1" value="1.0" oninput="document.getElementById('speedLabel').innerText=this.value+'x'" class="w-full accent-purple-500 bg-slate-800 rounded-lg h-1.5 cursor-pointer">
+                    <div class="text-[11px] text-slate-400 font-semibold">БАЛАНС:</div>
+                    <div class="text-sm font-bold text-cyan-400">3 144 таңба</div>
                 </div>
-
-                <div>
-                    <div class="flex justify-between text-xs font-medium mb-1.5">
-                        <span class="text-slate-300">Сапа (Диффузия)</span>
-                        <span class="text-cyan-400">100 қадам</span>
-                    </div>
-                    <input type="range" min="30" max="100" step="10" value="100" class="w-full accent-cyan-400 bg-slate-800 rounded-lg h-1.5 cursor-pointer">
-                </div>
+                <button class="text-xs bg-purple-600 hover:bg-purple-500 text-white font-medium px-2.5 py-1 rounded-lg">+ Толтыру</button>
             </div>
-        </div>
-
-        <div class="text-[11px] text-slate-500 text-center pt-6 border-t border-[#1f293d]">
-            UniDauys Studio Engine v2.0 • KazEmoTTS
+            <div class="flex items-center justify-between pt-2 border-t border-[#1f293d]/60">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-bold text-xs text-white">S</div>
+                    <div>
+                        <div class="text-xs font-semibold text-slate-200">Shalkar <span class="text-[9px] bg-purple-500/30 text-purple-300 px-1.5 py-0.5 rounded ml-1">ТЕГІН</span></div>
+                        <div class="text-[10px] text-slate-500">shalkaruisipkhan@gmail.com</div>
+                    </div>
+                </div>
+                <button onclick="location.reload()" class="text-slate-400 hover:text-red-400 p-2"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+            </div>
         </div>
     </aside>
 
-    <!-- 4. ELEVENLABS ҚАЛҚЫМАЛЫ ПЛЕЕРІ (FLOATING PLAYER) -->
-    <div class="fixed bottom-0 left-64 right-0 bg-[#070a12]/95 border-t border-[#1f293d] px-8 py-4 flex items-center justify-between z-30 backdrop-blur-md">
+    <!-- 2. ОРТАЛЫҚ АЙМАҚ -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto pb-32">
+        
+        <!-- СТУДИЯ КӨРІНІСІ (НЕГІЗГІ) -->
+        <div id="studioView" class="flex-1 flex flex-col">
+            <header class="h-16 border-b border-[#1f293d] px-8 flex items-center justify-between bg-[#0b0f19]/80 sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <i class="fa-regular fa-folder text-slate-400"></i>
+                    <input type="text" value="Жаңа жоба" class="bg-transparent text-sm font-semibold text-slate-200 outline-none">
+                </div>
+                <button class="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-semibold">✨ AI Көпкейіпкерлі қойылым</button>
+            </header>
+
+            <div class="p-8 max-w-5xl w-full mx-auto space-y-6">
+                <div class="bg-[#121826] border border-[#1f293d] rounded-2xl p-6 glow">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Дыбысталатын мәтін</span>
+                        <span id="charCounter" class="text-xs font-mono text-slate-400">0 / 2 500 таңба</span>
+                    </div>
+
+                    <!-- 6 ЭМОЦИЯ ЖӘНЕ КІДІРІС -->
+                    <div class="flex items-center gap-2 mb-3 flex-wrap">
+                        <span class="text-xs text-slate-400 mr-1 font-semibold">Эмоциялар:</span>
+                        <button type="button" onclick="insertTag('(neutral) ')" class="px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 cursor-pointer">😐 Бейтарап</button>
+                        <button type="button" onclick="insertTag('(happy) ')" class="px-3 py-1 rounded-full bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-300 text-xs font-medium border border-yellow-500/30 cursor-pointer">😄 Қуаныш</button>
+                        <button type="button" onclick="insertTag('(sad) ')" class="px-3 py-1 rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-xs font-medium border border-blue-500/30 cursor-pointer">🥺 Мұң</button>
+                        <button type="button" onclick="insertTag('(angry) ')" class="px-3 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-medium border border-red-500/30 cursor-pointer">😡 Ашу</button>
+                        <button type="button" onclick="insertTag('(fear) ')" class="px-3 py-1 rounded-full bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs font-medium border border-purple-500/30 cursor-pointer">😨 Үрей</button>
+                        <button type="button" onclick="insertTag('(surprise) ')" class="px-3 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-medium border border-emerald-500/30 cursor-pointer">😲 Таңданыс</button>
+                        <button type="button" onclick="insertTag(' ... ')" class="px-3 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700 cursor-pointer">⏸ Кідіріс</button>
+                    </div>
+
+                    <textarea id="ttsInput" rows="7" maxlength="2500"
+                        placeholder="Қазақша мәтін жазыңыз немесе смайликтерді басыңыз..."
+                        class="w-full bg-slate-900/60 text-slate-100 text-base rounded-xl p-4 border border-[#1f293d] focus:border-purple-500 outline-none resize-none leading-relaxed">😄 Сәлем! UniDauys студиясының Colab сынағы іске қосылды.</textarea>
+
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-xs text-slate-400"><i class="fa-solid fa-wand-magic-sparkles text-purple-400 mr-1.5"></i>Gemini AI режиссері кейіпкерлерді бөледі</div>
+                        <button id="btnRun" onclick="runSynth()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg cursor-pointer">
+                            <i class="fa-solid fa-bolt"></i><span>Сөзді синтездеу</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- «МЕНІҢ ЖОБАЛАРЫМ» БӨЛІМІ (ОРТАЛЫҚ КЕҢІСТІК) -->
+        <div id="projectsView" class="hidden flex-col gap-5 max-w-5xl w-full mx-auto p-8">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100 flex items-center gap-2">
+                        <span>📁</span> Менің жобаларым
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Генерацияланған барлық Master WAV және Stems ZIP аудиолар архиві</p>
+                </div>
+                <button onclick="switchNavTab('studio')" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2">
+                    <span>+</span> Жаңа дауыстау
+                </button>
+            </div>
+
+            <!-- Сүзгі, іздеу панелі -->
+            <div class="bg-[#121826] border border-[#1f293d] rounded-xl p-3 flex items-center justify-between gap-3 flex-wrap">
+                <div class="bg-slate-950 p-1 rounded-lg border border-[#1f293d] flex gap-1 text-xs">
+                    <button class="px-3 py-1 rounded bg-purple-600 text-white font-semibold">Барлығы</button>
+                    <button class="px-3 py-1 rounded text-slate-400 hover:text-white">🎵 WAV</button>
+                    <button class="px-3 py-1 rounded text-slate-400 hover:text-white">📦 ZIP</button>
+                </div>
+                <input type="text" placeholder="Жобаны іздеу..." class="bg-slate-950 border border-[#1f293d] rounded-lg px-3 py-1.5 text-xs text-slate-200 outline-none w-48">
+            </div>
+
+            <!-- Бос күй (Empty state) -->
+            <div class="bg-[#121826] border border-dashed border-[#1f293d] rounded-2xl p-16 text-center flex flex-col items-center justify-center">
+                <div class="w-14 h-14 rounded-2xl bg-purple-950/40 border border-purple-500/20 flex items-center justify-center text-2xl mb-4">
+                    📁
+                </div>
+                <h3 class="text-base font-bold text-slate-200 mb-1">Әзірге жасалған жобалар жоқ</h3>
+                <p class="text-xs text-slate-400 max-w-sm mb-5">
+                    Мәтінді дауыстаған кезде оның Master WAV дыбысы мен Stems ZIP мұрағаты автоматты түрде осы тізімде сақталады.
+                </p>
+                <button onclick="switchNavTab('studio')" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-5 py-2 rounded-xl text-xs">
+                    🎙️ Студияда дауыстау жасау
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 3. ОҢ ЖАҚ ДАУЫС БАПТАУЛАРЫ -->
+    <aside id="rightVoiceSettings" class="w-80 bg-[#121826] border-l border-[#1f293d] p-6 flex flex-col justify-between flex-shrink-0">
+        <div class="space-y-6">
+            <h3 class="font-bold text-sm uppercase tracking-wider text-slate-400 flex items-center gap-2"><i class="fa-solid fa-sliders text-cyan-400"></i> Дауыс баптаулары</h3>
+            <div>
+                <label class="text-xs font-semibold text-slate-300 block mb-2">Негізгі диктор</label>
+                <div class="space-y-2">
+                    <div id="spk-2" onclick="setSpk(2)" class="flex items-center justify-between p-3 rounded-xl border border-purple-500/60 bg-purple-950/20 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-purple-600/30 text-purple-300 flex items-center justify-center font-bold text-xs">M2</div>
+                            <div><div class="text-xs font-bold text-white">Баяндаушы (M2)</div><div class="text-[10px] text-slate-400">Сабырлы, қоңыр дауыс</div></div>
+                        </div>
+                        <input type="radio" name="spk" checked class="accent-purple-600">
+                    </div>
+                    <div id="spk-1" onclick="setSpk(1)" class="flex items-center justify-between p-3 rounded-xl border border-[#1f293d] bg-slate-900/40 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-cyan-600/30 text-cyan-300 flex items-center justify-center font-bold text-xs">F1</div>
+                            <div><div class="text-xs font-bold text-white">Айнұр (F1)</div><div class="text-[10px] text-slate-400">Нәзік әйел дауысы</div></div>
+                        </div>
+                        <input type="radio" name="spk" class="accent-purple-600">
+                    </div>
+                    <div id="spk-0" onclick="setSpk(0)" class="flex items-center justify-between p-3 rounded-xl border border-[#1f293d] bg-slate-900/40 cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-600/30 text-blue-300 flex items-center justify-center font-bold text-xs">M1</div>
+                            <div><div class="text-xs font-bold text-white">Азамат (M1)</div><div class="text-[10px] text-slate-400">Жігерлі ер адам</div></div>
+                        </div>
+                        <input type="radio" name="spk" class="accent-purple-600">
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-4 pt-4 border-t border-[#1f293d]">
+                <div>
+                    <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-slate-300">Жылдамдық</span><span class="text-purple-400 font-bold" id="lblSpeed">1.0x</span></div>
+                    <input type="range" id="inSpeed" min="0.8" max="1.3" step="0.1" value="1.0" oninput="document.getElementById('lblSpeed').innerText=this.value+'x'" class="w-full accent-purple-500 bg-slate-800 rounded-lg h-1.5 cursor-pointer">
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs font-medium mb-1.5"><span class="text-slate-300">Сапа (Диффузия)</span><span class="text-cyan-400 font-bold" id="lblSteps">100 қадам</span></div>
+                    <input type="range" id="inSteps" min="20" max="100" step="10" value="100" oninput="document.getElementById('lblSteps').innerText=this.value+' қадам'" class="w-full accent-cyan-400 bg-slate-800 rounded-lg h-1.5 cursor-pointer">
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 4. ТӨМЕНГІ АУДИО ПЛЕЕР -->
+    <div class="fixed bottom-0 left-64 right-0 bg-[#070a12]/95 border-t border-[#1f293d] px-8 py-4 flex items-center justify-between z-30">
         <div class="flex items-center gap-3 w-1/4">
-            <div class="w-10 h-10 rounded-lg bg-purple-950/80 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                <i class="fa-solid fa-waveform-lines"></i>
-            </div>
+            <div class="w-10 h-10 rounded-lg bg-purple-950/80 border border-purple-500/30 flex items-center justify-center text-purple-400"><i class="fa-solid fa-waveform-lines"></i></div>
             <div class="truncate">
-                <div class="text-sm font-bold text-white truncate" id="trackTitle">UniDauys Master</div>
-                <div class="text-xs text-slate-400" id="trackStatus">Мәтінді жазып, синтез батырмасын басыңыз</div>
+                <div class="text-sm font-bold text-white truncate" id="audioTitle">UniDauys Master</div>
+                <div class="text-xs text-slate-400" id="audioStatus">Синтезді басыңыз</div>
             </div>
         </div>
-
-        <audio id="audioPlayer" class="w-1/2 h-8" controls></audio>
-
+        <audio id="mainPlayer" class="w-1/2 h-8" controls></audio>
         <div class="flex items-center gap-2 w-1/4 justify-end">
-            <a id="dlMaster" href="#" download class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-200 transition-all">
-                <i class="fa-solid fa-download mr-1"></i> Master WAV
-            </a>
-            <a id="dlStems" href="#" download class="px-3.5 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-xs font-semibold rounded-lg border border-purple-500/30 transition-all">
-                <i class="fa-solid fa-file-zipper mr-1"></i> Stems ZIP
-            </a>
+            <a id="btnWav" href="#" download class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-200"><i class="fa-solid fa-download mr-1"></i> Master WAV</a>
         </div>
     </div>
 
-    <!-- СКРИПТТЕР -->
-    
+    <script>
+        let currentSpeaker = 2;
 
+        // ЭКРАНДАРДЫ АУЫСТЫРУ (СТУДИЯ / МЕНІҢ ЖОБАЛАРЫМ)
+        function switchNavTab(tab) {
+            const btnStudio = document.getElementById('btnTabStudio');
+            const btnProjects = document.getElementById('btnTabProjects');
+            const studioView = document.getElementById('studioView');
+            const projectsView = document.getElementById('projectsView');
+            const rightAside = document.getElementById('rightVoiceSettings');
 
+            if (tab === 'studio') {
+                btnStudio.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-white border border-purple-500/30 rounded-xl transition-all';
+                btnProjects.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl border border-transparent transition-all';
+                studioView.style.display = 'flex';
+                projectsView.style.display = 'none';
+                rightAside.style.display = 'flex';
+            } else {
+                btnProjects.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-white border border-purple-500/30 rounded-xl transition-all';
+                btnStudio.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl border border-transparent transition-all';
+                studioView.style.display = 'none';
+                projectsView.style.display = 'flex';
+                rightAside.style.display = 'none';
+            }
+        }
 
+        function setSpk(id) {
+            currentSpeaker = id;
+            [0, 1, 2].forEach(i => {
+                const el = document.getElementById('spk-' + i);
+                el.querySelector('input').checked = (i === id);
+                el.className = (i === id) ? 
+                    'flex items-center justify-between p-3 rounded-xl border border-purple-500/60 bg-purple-950/20 cursor-pointer' : 
+                    'flex items-center justify-between p-3 rounded-xl border border-[#1f293d] bg-slate-900/40 cursor-pointer';
+            });
+        }
 
+        function insertTag(tag) {
+            const ta = document.getElementById('ttsInput');
+            ta.focus();
+            const start = ta.selectionStart || 0;
+            const end = ta.selectionEnd || 0;
+            ta.value = ta.value.substring(0, start) + tag + ta.value.substring(end);
+            ta.selectionStart = ta.selectionEnd = start + tag.length;
+            document.getElementById('charCounter').innerText = ta.value.length + ' / 2 500 таңба';
+        }
 
-<script>
-function switchTabScreen(tab) {
-  const header = document.querySelector('main > header');
-  const studioBody = document.getElementById('studioMainEditorBody') || document.querySelector('main > .max-w-5xl');
-  const rightAside = document.querySelector('aside.w-80') || document.querySelector('aside:last-of-type');
-  const projectsScreen = document.getElementById('screen-projects');
+        document.getElementById('ttsInput').addEventListener('input', e => {
+            document.getElementById('charCounter').innerText = e.target.value.length + ' / 2 500 таңба';
+        });
 
-  const btnStudio = document.getElementById('tabBtnStudio');
-  const btnProjects = document.getElementById('tabBtnProjects');
+        async function runSynth() {
+            const ta = document.getElementById('ttsInput');
+            let txt = ta.value.trim();
+            if(!txt) return alert('Мәтін жазыңыз!');
 
-  if (tab === 'studio') {
-    // 1. Студия элементтерін қайта көрсету
-    if (header) header.style.display = '';
-    if (studioBody) studioBody.style.display = '';
-    if (rightAside) rightAside.style.display = '';
-    if (projectsScreen) projectsScreen.style.display = 'none';
+            let clean = txt.replace(/😄/g, '(happy)').replace(/🥺/g, '(sad)').replace(/😡/g, '(angry)')
+                           .replace(/😨/g, '(fear)').replace(/😲/g, '(surprise)').replace(/😐/g, '(neutral)');
 
-    // 2. Батырма стилін жаңарту
-    if (btnStudio) {
-      btnStudio.className = "w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-purple-300 border border-purple-500/20 rounded-xl transition-all";
-    }
-    if (btnProjects) {
-      btnProjects.className = "w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all border border-transparent";
-    }
-  } else {
-    // 1. Студия мен оң жақ баптауларды жасыру
-    if (header) header.style.display = 'none';
-    if (studioBody) studioBody.style.display = 'none';
-    if (rightAside) rightAside.style.display = 'none';
-    
-    // 2. Менің жобаларым архивін толық кеңістікке ашу
-    if (projectsScreen) {
-      projectsScreen.style.display = 'flex';
-      if (typeof loadProjects === 'function') loadProjects();
-    }
+            const btn = document.getElementById('btnRun');
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Дыбысталуда...';
+            document.getElementById('audioStatus').innerText = 'Модель жұмыс істеп жатыр...';
 
-    // 3. Батырма стилін жаңарту
-    if (btnProjects) {
-      btnProjects.className = "w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-purple-300 border border-purple-500/20 rounded-xl transition-all";
-    }
-    if (btnStudio) {
-      btnStudio.className = "w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all border border-transparent";
-    }
-  }
-}
-</script>
-
-
-<script>
-let projectsData = [];
-let currentFilter = 'all';
-
-// 1. СҮЗГІ ТАҢДАУ ЖӘНЕ КНОПКА ТҮСІН АУЫСТЫРУ
-function filterProjects(type) {
-  currentFilter = type;
-  
-  const buttons = {
-    'all': document.getElementById('fltAll'),
-    'wav': document.getElementById('fltWav'),
-    'zip': document.getElementById('fltZip')
-  };
-
-  for (const [key, btn] of Object.entries(buttons)) {
-    if (!btn) continue;
-    if (key === type) {
-      btn.style.background = '#A99BFF';
-      btn.style.color = '#0A0C11';
-      btn.style.fontWeight = '700';
-    } else {
-      btn.style.background = 'transparent';
-      btn.style.color = '#8E97A8';
-      btn.style.fontWeight = '500';
-    }
-  }
-
-  renderProjectsList();
-}
-
-// 2. БАЗАДАН ЖОБАЛАРДЫ ТАРТУ
-async function loadProjects() {
-  const token = localStorage.getItem('unidauys_jwt');
-  try {
-    const res = await fetch('/api/projects', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      projectsData = data.projects || [];
-    } else {
-      projectsData = [];
-    }
-  } catch(e) {
-    projectsData = [];
-  }
-  renderProjectsList();
-}
-
-// 3. ІЗДЕУ, СҰРЫПТАУ ЖӘНЕ КАРТОЧКАЛАРДЫ ШЫҒАРУ
-function renderProjectsList() {
-  const container = document.getElementById('projectsContainer');
-  if (!container) return;
-
-  const sort = document.getElementById('projectSort')?.value || 'newest';
-  const q = (document.getElementById('projectSearch')?.value || '').toLowerCase().trim();
-
-  let list = [...projectsData];
-
-  // Іздеу сүзгісі
-  if (q) {
-    list = list.filter(p => 
-      (p.title && p.title.toLowerCase().includes(q)) || 
-      (p.text_content && p.text_content.toLowerCase().includes(q))
-    );
-  }
-
-  // Түр сүзгісі (WAV / ZIP)
-  if (currentFilter === 'wav') {
-    list = list.filter(p => p.master_url);
-  } else if (currentFilter === 'zip') {
-    list = list.filter(p => p.stems_url);
-  }
-
-  // Сұрыптау
-  if (sort === 'newest') {
-    list.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-  } else if (sort === 'oldest') {
-    list.sort((a,b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
-  } else if (sort === 'chars') {
-    list.sort((a,b) => (b.char_count || 0) - (a.char_count || 0));
-  }
-
-  // Жоба жоқ болса немесе іздеу нәтижесі бос болса
-  if (list.length === 0) {
-    container.innerHTML = `
-      <div style="background:#0D1017; border:1px dashed #232836; border-radius:20px; padding:60px 24px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; margin-top:16px;">
-        <div style="width:56px; height:56px; border-radius:16px; background:rgba(169,155,255,0.1); display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:14px; border:1px solid rgba(169,155,255,0.2);">
-          ${q ? '🔍' : '📁'}
-        </div>
-        <h3 style="font-size:16px; font-weight:800; color:#F1EEE8; margin:0 0 6px 0;">
-          ${q ? 'Іздеу бойынша ештеңе табылмады' : 'Әзірге жасалған жобалар жоқ'}
-        </h3>
-        <p style="font-size:13px; color:#8E97A8; max-width:360px; line-height:1.5; margin:0 0 18px 0;">
-          ${q ? 'Басқа сөз жазып көріңіз немесе сүзгіні тазартыңыз.' : 'Мәтінді синтездеген кезде аудио файлдар осы тізімге автоматты түрде жиналады.'}
-        </p>
-        ${!q ? `
-        <button onclick="switchTabScreen('studio')" style="background:linear-gradient(135deg,#A99BFF,#8B5CF6); color:#0A0C11; border:none; border-radius:12px; padding:10px 20px; font-size:13px; font-weight:800; cursor:pointer;">
-          🎙️ Студияда дауыстау жасау
-        </button>` : ''}
-      </div>
-    `;
-    return;
-  }
-
-  const spkBadge = {
-    0: '<span style="color:#4ED8B8;background:rgba(78,216,184,0.1);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">M1 Азамат</span>',
-    1: '<span style="color:#FF7DBE;background:rgba(255,125,190,0.1);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">F1 Айнұр</span>',
-    2: '<span style="color:#A99BFF;background:rgba(169,155,255,0.1);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">M2 Баяндаушы</span>'
-  };
-
-  container.innerHTML = list.map(p => `
-    <div style="background:#0D1017; border:1px solid #232836; border-radius:16px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; transition:all 0.15s;" onmouseover="this.style.borderColor='#384256'" onmouseout="this.style.borderColor='#232836'">
-      <div style="display:flex; align-items:center; gap:14px; min-width:280px; flex:1;">
-        <button onclick="playProjectAudio('${p.master_url}')" title="Ойнату" style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#A99BFF,#8B5CF6); border:none; color:#0A0C11; font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;">
-          ▶
-        </button>
-        <div style="overflow:hidden;">
-          <div style="font-size:14px; font-weight:700; color:#F1EEE8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-            ${p.title || 'Атаусыз жоба'}
-          </div>
-          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-            ${spkBadge[p.speaker_id] || spkBadge[2]}
-            <span style="font-size:12px; color:#8E97A8;">📝 ${p.char_count || 0} таңба</span>
-            <span style="font-size:11px; color:#6C7584;">• ${p.created_at || ''}</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-        <button onclick="reopenProjectText('${encodeURIComponent(p.text_content || '')}')" title="Студияда ашу" style="background:#05070A; border:1px solid #232836; color:#8E97A8; padding:8px 12px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer;">
-          ✍️ Ашу
-        </button>
-        <a href="${p.master_url}" download style="background:#171B24; border:1px solid #2E3444; color:#F1EEE8; padding:8px 14px; border-radius:10px; font-size:12px; font-weight:700; text-decoration:none;">
-          🎵 WAV ⬇
-        </a>
-        ${p.stems_url ? `
-          <a href="${p.stems_url}" download style="background:rgba(78,216,184,0.12); border:1px solid #4ED8B8; color:#4ED8B8; padding:8px 14px; border-radius:10px; font-size:12px; font-weight:700; text-decoration:none;">
-            📦 ZIP ⬇
-          </a>
-        ` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function playProjectAudio(url) {
-  const p = document.querySelector('audio');
-  if (p) { p.src = url; p.play(); }
-}
-
-function reopenProjectText(encText) {
-  const t = decodeURIComponent(encText);
-  const ta = document.querySelector('textarea');
-  if (ta) {
-    ta.value = t;
-    ta.dispatchEvent(new Event('input'));
-  }
-  if (typeof switchTabScreen === 'function') {
-    switchTabScreen('studio');
-  }
-}
-</script>
-
+            try {
+                const res = await fetch('/api/synthesize', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        text: clean,
+                        speaker: currentSpeaker,
+                        speed: parseFloat(document.getElementById('inSpeed').value),
+                        steps: parseInt(document.getElementById('inSteps').value)
+                    })
+                });
+                const data = await res.json();
+                if(data.audio_url) {
+                    const p = document.getElementById('mainPlayer');
+                    p.src = data.audio_url + '?t=' + Date.now();
+                    p.play();
+                    document.getElementById('btnWav').href = data.audio_url;
+                    document.getElementById('audioStatus').innerText = 'Дайын болды!';
+                } else {
+                    alert('Қате: ' + (data.detail || 'Нәтиже алынбады'));
+                }
+            } catch(e) {
+                alert('Қате орын алды: ' + e);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        }
+    </script>
 </body>
-
 </html>
