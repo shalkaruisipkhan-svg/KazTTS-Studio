@@ -12,7 +12,7 @@
         ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 3px; }
         .glow { box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.25); }
     </style>
-</head>
+<script>window.logoutUser = function() { if(confirm("Шығуды растайсыз ба?")) { localStorage.clear(); sessionStorage.clear(); window.location.href="/"; } };</script></head>
 <body class="bg-[#0b0f19] text-slate-100 flex h-screen overflow-hidden font-sans">
 
     <!-- 1. СОЛ ЖАҚ МӘЗІР -->
@@ -58,7 +58,7 @@
                         <div class="text-[10px] text-slate-500">shalkaruisipkhan@gmail.com</div>
                     </div>
                 </div>
-                <button onclick="location.reload()" class="text-slate-400 hover:text-red-400 p-2"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                <button onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='/';" class="text-slate-400 hover:text-red-400 p-2"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
             </div>
         </div>
     </aside>
@@ -255,11 +255,11 @@
             document.getElementById('charCounter').innerText = ta.value.length + ' / 2 500 таңба';
         }
 
-        document.getElementById('ttsInput').addEventListener('input', e => {
+        const _inp = document.getElementById('ttsInput'); if(_inp) _inp.addEventListener('input', e => {
             document.getElementById('charCounter').innerText = e.target.value.length + ' / 2 500 таңба';
         });
 
-        async function runSynth() {
+        window.runSynth = async function runSynth() {
             const ta = document.getElementById('ttsInput');
             let txt = ta.value.trim();
             if(!txt) return alert('Мәтін жазыңыз!');
@@ -276,7 +276,7 @@
             try {
                 const res = await fetch('/api/synthesize', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('unidauys_jwt') || '')},
                     body: JSON.stringify({
                         text: clean,
                         speaker: currentSpeaker,
@@ -302,5 +302,40 @@
             }
         }
     </script>
+
+<script>
+function logoutUser() {
+    if (confirm('Жүйеден шығуды растайсыз ба?')) {
+        localStorage.removeItem('unidauys_jwt');
+        localStorage.removeItem('token');
+        sessionStorage.clear();
+        window.location.href = '/';
+    }
+}
+</script>
+
+
+<script>
+function doLogout() {
+    if (confirm('Жүйеден шығуды растайсыз ба?')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = '/';
+    }
+}
+window.logoutUser = doLogout;
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Шығу белгішесін SVG жолы бойынша тауып, басуды бекіту
+    document.querySelectorAll('svg').forEach(svg => {
+        if (svg.innerHTML.includes('M9 21H5') || svg.closest('button[title*="Шығу"]')) {
+            const btn = svg.closest('button') || svg;
+            btn.onclick = doLogout;
+            btn.style.cursor = 'pointer';
+        }
+    });
+});
+</script>
+
 </body>
 </html>

@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+import os
+load_dotenv("/root/KazTTS-Studio/.env")
+import base64
+import requests
 import os
 import sqlite3
 import hashlib
@@ -256,34 +261,69 @@ def api_ai_direct(req: AIDirectRequest, token_data: dict = Depends(verify_jwt_to
     formatted = f"(happy) Сәлем! {raw}"
     return {"status": "success", "formatted_script": formatted}
 
+@app.post("/api/synthesize")
 @app.post("/api/studio/synthesize")
 def api_synthesize(req: StudioSynthRequest, token_data: dict = Depends(verify_jwt_token)):
     user_id = token_data.get("sub")
     clean_text = req.text.strip()
     char_len = len(clean_text)
 
+    if char_len == 0:
+        raise HTTPException(status_code=400, detail="Мәтін бос болмауы керек!")
+
     with get_db() as conn:
         user = conn.execute("SELECT balance FROM users WHERE id = ?", (user_id,)).fetchone()
         if not user or user["balance"] < char_len:
             raise HTTPException(status_code=400, detail="Балансыңызда таңба жеткіліксіз!")
 
+        gpu_url = os.getenv("GPU_WORKER_URL", "").rstrip("/")
+        if not gpu_url:
+            raise HTTPException(status_code=500, detail="GPU Worker URL бапталмаған!")
+
+        try:
+            spk = getattr(req, "speaker_id", None) or getattr(req, "speaker", 1)
+            payload = {
+                "text": clean_text,
+                "speaker": int(spk),
+                "speed": getattr(req, "speed", 1.0),
+                "steps": getattr(req, "steps", 50)
+            }
+            r = requests.post(f"{gpu_url}/synthesize", json=payload, timeout=60)
+            if r.status_code != 200:
+                raise HTTPException(status_code=500, detail=f"GPU қатесі: {r.status_code}")
+            data = r.json()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Генерация кезінде қате орын алды: {e}")
+
+        proj_id = f"prj_{uuid.uuid4().hex[:8]}"
+        out_filename = f"{proj_id}.wav"
+        save_path = os.path.join("static", "audio", "generated", out_filename)
+
+        if "audio_base64" in data and data["audio_base64"]:
+            with open(save_path, "wb") as af:
+                af.write(base64.b64decode(data["audio_base64"]))
+        elif "audio_url" in data and data["audio_url"]:
+            audio_resp = requests.get(data["audio_url"], timeout=30)
+            with open(save_path, "wb") as af:
+                af.write(audio_resp.content)
+
+        master_file = f"/static/audio/generated/{out_filename}"
+
         new_balance = max(0, user["balance"] - char_len)
         conn.execute("UPDATE users SET balance = ? WHERE id = ?", (new_balance, user_id))
 
-        proj_id = f"prj_{uuid.uuid4().hex[:8]}"
         project_title = clean_text[:40] + ("..." if len(clean_text) > 40 else "")
-        master_file = f"/static/audio/demo/demo_m{req.speaker_id}.wav"
-        
         conn.execute("""
             INSERT INTO projects (id, user_id, title, text_content, speaker_id, char_count, master_url, stems_url)
             VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
-        """, (proj_id, user_id, project_title, clean_text, req.speaker_id, char_len, master_file))
+        """, (proj_id, user_id, project_title, clean_text, int(spk), char_len, master_file))
         conn.commit()
 
     return {
         "status": "success",
         "project_id": proj_id,
         "master_url": master_file,
+        "audio_url": master_file,
         "stems_url": None,
         "deducted": char_len,
         "new_balance": new_balance

@@ -30,7 +30,7 @@ HIFIGAN_CHECKPT = './checkpts/hifigan.pt'
 if __name__ == '__main__':
     hps, args = utils.get_hparams_decode()
     device = torch.device('cpu' if not torch.cuda.is_available() else "cuda")
-    ckpt = utils_data.latest_checkpoint_path(hps.model_dir, "EMA_grad_*.pt")
+    ckpt = "./logs/train_logs/EMA_grad_10000.pt"
     print(ckpt)
     model = GradTTSWithEmo(**hps.model).to(device)
     logger = utils_data.get_logger(hps.model_dir, "inference.log")
@@ -86,4 +86,4 @@ if __name__ == '__main__':
         audio = audio * 32768.0
         audio = audio.detach().cpu().numpy().astype('int16')
         audio = AudioSegment(audio.data, frame_rate=22050, sample_width=2, channels=1)
-        audio.export(f'{args.generated_path}/{i:04d}_{emos[emo_i]}_{speakers[int(line.split("|")[2])]}.wav', format="wav")
+        audio.export(f'{args.generated_path}/{emos[emo_i]}_{speakers[int(line.split("|")[2])]}.wav', format="wav")
