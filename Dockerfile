@@ -2,7 +2,7 @@ FROM runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04
 
 WORKDIR /app
 
-# 1. Установка системных компиляторов и звуковых библиотек
+# 1. Системные аудио-библиотеки и компиляторы
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
@@ -13,16 +13,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Установка базовых инструментов сборки для Cython
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel cython numpy
+# 2. Инструменты сборки со строгой фиксацией numpy<2
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel cython "numpy<2.0.0"
 
 # 3. Копируем проект
 COPY . /app
 
-# 4. Установка Python-зависимостей
-RUN pip install --no-cache-dir runpod fastapi uvicorn requests soundfile scipy
+# 4. Установка всех необходимых аудио и серверных библиотек
+RUN pip install --no-cache-dir \
+    "numpy<2.0.0" \
+    pydub \
+    kaldiio \
+    soundfile \
+    scipy \
+    librosa \
+    num2words \
+    attrdict \
+    runpod \
+    fastapi \
+    uvicorn \
+    requests
 
-# 5. Компиляция модуля monotonic_align (исправляет ошибку exit code 2)
+# 5. Компиляция модуля monotonic_align под numpy 1.x
 WORKDIR /app/KazEmoTTS/model/monotonic_align
 RUN python3 setup.py build_ext --inplace
 
