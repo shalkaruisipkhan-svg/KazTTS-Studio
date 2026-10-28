@@ -4,23 +4,26 @@ import glob
 import time
 import base64
 import subprocess
+import traceback
 import runpod
 
 BASE_DIR = "/app/KazEmoTTS"
 if os.path.exists(BASE_DIR):
     sys.path.insert(0, BASE_DIR)
 
-def run_tts_synthesis(text, speaker=2, emotion=0, steps=40, output_file="/tmp/output.wav"):
-    # 1. Попытка вызвать synthesize_text из engine.py
+def run_tts_synthesis(text, speaker=2, emotion=0, steps=35, output_file="/tmp/output.wav"):
+    errors = []
+    
+    # 1. Попытка через engine.py
     try:
         from engine import synthesize_text
         res = synthesize_text(text, speaker=speaker, emotion=emotion, steps=steps, output_file=output_file)
         if res and os.path.exists(output_file):
-            return output_file
+            return output_file, None
     except Exception as e:
-        print(f"engine.py error: {e}")
+        errors.append(f"engine.py error: {traceback.format_exc()}")
 
-    # 2. Прямой гарантированный запуск через inference_EMA.py
+    # 2. Прямой запуск через subprocess
     os.makedirs(f"{BASE_DIR}/filelists", exist_ok=True)
     temp_res_dir = f"/tmp/runpod_tts_{int(time.time()*1000)}"
     os.makedirs(temp_res_dir, exist_ok=True)
@@ -39,7 +42,9 @@ def run_tts_synthesis(text, speaker=2, emotion=0, steps=40, output_file="/tmp/ou
         "-r", temp_res_dir
     ]
 
-    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if p.returncode != 0:
+        errors.append(f"Subprocess returncode {p.returncode}. Stderr: {p.stderr[:500]} | Stdout: {p.stdout[:500]}")
 
     wavs = glob.glob(f"{temp_res_dir}/*.wav")
     if wavs:
@@ -47,9 +52,9 @@ def run_tts_synthesis(text, speaker=2, emotion=0, steps=40, output_file="/tmp/ou
         if os.path.exists(output_file):
             os.remove(output_file)
         os.rename(latest, output_file)
-        return output_file
+        return output_file, None
 
-    return None
+    return None, " ; ".join(errors)
 
 def handler(event):
     job_input = event.get("input", {})
@@ -62,10 +67,10 @@ def handler(event):
         return {"error": "Text is empty"}
 
     out_wav = "/tmp/out_result.wav"
-    res = run_tts_synthesis(text, speaker=speaker, emotion=emotion, steps=steps, output_file=out_wav)
+    res, err = run_tts_synthesis(text, speaker=speaker, emotion=emotion, steps=steps, output_file=out_wav)
 
     if not res or not os.path.exists(out_wav):
-        return {"error": "Failed to synthesize speech audio"}
+        return {"error": f"Synthesis failed: {err}"}
 
     with open(out_wav, "rb") as f:
         b64 = base64.b64encode(f.read()).decode("utf-8")
