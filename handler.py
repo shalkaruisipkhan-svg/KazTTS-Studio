@@ -1,9 +1,3 @@
-import collections
-import collections.abc
-collections.Mapping = collections.abc.Mapping
-collections.MutableMapping = collections.abc.MutableMapping
-collections.Sequence = collections.abc.Sequence
-collections.MutableSequence = collections.abc.MutableSequence
 import os
 import sys
 import glob
@@ -11,6 +5,15 @@ import time
 import base64
 import subprocess
 import traceback
+import collections
+import collections.abc
+
+# Патч совместимости attrdict с Python 3.10
+collections.Mapping = collections.abc.Mapping
+collections.MutableMapping = collections.abc.MutableMapping
+collections.Sequence = collections.abc.Sequence
+collections.MutableSequence = collections.abc.MutableSequence
+
 import runpod
 
 BASE_DIR = "/app/KazEmoTTS"
@@ -20,16 +23,7 @@ if os.path.exists(BASE_DIR):
 def run_tts_synthesis(text, speaker=2, emotion=0, steps=35, output_file="/tmp/output.wav"):
     errors = []
     
-    # 1. Попытка через engine.py
-    try:
-        from engine import synthesize_text
-        res = synthesize_text(text, speaker=speaker, emotion=emotion, steps=steps, output_file=output_file)
-        if res and os.path.exists(output_file):
-            return output_file, None
-    except Exception:
-        errors.append(f"engine error: {traceback.format_exc()}")
-
-    # 2. Прямой запуск через subprocess
+    # Прямой вызов inference_EMA.py с явным указанием cwd=BASE_DIR
     os.makedirs(f"{BASE_DIR}/filelists", exist_ok=True)
     temp_res_dir = f"/tmp/runpod_tts_{int(time.time()*1000)}"
     os.makedirs(temp_res_dir, exist_ok=True)
@@ -48,7 +42,7 @@ def run_tts_synthesis(text, speaker=2, emotion=0, steps=35, output_file="/tmp/ou
         "-r", temp_res_dir
     ]
 
-    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=BASE_DIR)
     if p.returncode != 0:
         errors.append(f"Returncode {p.returncode}: Stderr={p.stderr[:400]} | Stdout={p.stdout[:400]}")
 
