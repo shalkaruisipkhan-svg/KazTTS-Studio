@@ -46,7 +46,7 @@
             <div class="flex items-center justify-between mb-3 px-1">
                 <div>
                     <div class="text-[11px] text-slate-400 font-semibold">БАЛАНС:</div>
-                    <div class="text-sm font-bold text-cyan-400">3 144 таңба</div>
+                    <div id="userBalanceNum" class="text-sm font-bold text-cyan-400">3 144 таңба</div>
                 </div>
                 <button class="text-xs bg-purple-600 hover:bg-purple-500 text-white font-medium px-2.5 py-1 rounded-lg">+ Толтыру</button>
             </div>
@@ -73,7 +73,7 @@
                     <i class="fa-regular fa-folder text-slate-400"></i>
                     <input type="text" value="Жаңа жоба" class="bg-transparent text-sm font-semibold text-slate-200 outline-none">
                 </div>
-                <button class="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-semibold">✨ AI Көпкейіпкерлі қойылым</button>
+                <button id="btnAi" type="button" aria-pressed="false" onclick="toggleAiPlay()" class="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-semibold">✨ AI Көпкейіпкерлі қойылым</button>
             </header>
 
             <div class="p-8 max-w-5xl w-full mx-auto space-y-6">
@@ -209,98 +209,278 @@
     </div>
 
     <script>
-        let currentSpeaker = 2;
+        let currentSpeaker = 2; // kaztts-main
+        let isAiMode = false;
+        const MAX_LEN = 2500;
+        const EMOJI_TAGS = [['😄', '(happy)'], ['🥺', '(sad)'], ['😡', '(angry)'], ['😨', '(fear)'], ['😲', '(surprise)'], ['😐', '(neutral)']];
+        const SPK_ON = 'flex items-center justify-between p-3 rounded-xl border border-purple-500/60 bg-purple-950/20 cursor-pointer';
+        const SPK_OFF = 'flex items-center justify-between p-3 rounded-xl border border-[#1f293d] bg-slate-900/40 cursor-pointer';
+
+        function $(id) { return document.getElementById(id); }
+        function getToken() { try { return localStorage.getItem('unidauys_jwt') || ''; } catch (e) { return ''; } }
+        function goHome() {
+            try { localStorage.removeItem('unidauys_jwt'); } catch (e) {}
+            window.location.href = '/';
+        }
+        async function authFetch(url, options) {
+            const opts = Object.assign({}, options || {});
+            opts.headers = Object.assign({}, opts.headers || {}, { 'Authorization': 'Bearer ' + getToken() });
+            const res = await fetch(url, opts);
+            if (res.status === 401) {
+                goHome();
+                const err = new Error('Сессия мерзімі аяқталды');
+                err.silent = true;
+                throw err;
+            }
+            return res;
+        }
+        async function readJson(res) { try { return await res.json(); } catch (e) { return {}; } }
+        function errText(data, fallback) {
+            if (data && typeof data.detail === 'string') return data.detail;
+            if (data && Array.isArray(data.detail)) return data.detail.map(d => d.msg || JSON.stringify(d)).join(', ');
+            return fallback;
+        }
 
         // ЭКРАНДАРДЫ АУЫСТЫРУ (СТУДИЯ / МЕНІҢ ЖОБАЛАРЫМ)
         function switchNavTab(tab) {
-            const btnStudio = document.getElementById('btnTabStudio');
-            const btnProjects = document.getElementById('btnTabProjects');
-            const studioView = document.getElementById('studioView');
-            const projectsView = document.getElementById('projectsView');
-            const rightAside = document.getElementById('rightVoiceSettings');
+            const btnStudio = $('btnTabStudio');
+            const btnProjects = $('btnTabProjects');
+            const studioView = $('studioView');
+            const projectsView = $('projectsView');
+            const rightAside = $('rightVoiceSettings');
+            const on = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-white border border-purple-500/30 rounded-xl transition-all';
+            const off = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl border border-transparent transition-all';
 
             if (tab === 'studio') {
-                btnStudio.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-white border border-purple-500/30 rounded-xl transition-all';
-                btnProjects.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl border border-transparent transition-all';
-                studioView.style.display = 'flex';
-                projectsView.style.display = 'none';
-                rightAside.style.display = 'flex';
+                if (btnStudio) btnStudio.className = on;
+                if (btnProjects) btnProjects.className = off;
+                if (studioView) studioView.style.display = 'flex';
+                if (projectsView) projectsView.style.display = 'none';
+                if (rightAside) rightAside.style.display = 'flex';
             } else {
-                btnProjects.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium bg-purple-600/10 text-white border border-purple-500/30 rounded-xl transition-all';
-                btnStudio.className = 'w-full flex items-center gap-3.5 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl border border-transparent transition-all';
-                studioView.style.display = 'none';
-                projectsView.style.display = 'flex';
-                rightAside.style.display = 'none';
+                if (btnProjects) btnProjects.className = on;
+                if (btnStudio) btnStudio.className = off;
+                if (studioView) studioView.style.display = 'none';
+                if (projectsView) projectsView.style.display = 'flex';
+                if (rightAside) rightAside.style.display = 'none';
+                loadProjects();
             }
         }
 
+        // ДИКТОРЛАР
         function setSpk(id) {
+            if (isAiMode) return; // AI қосулы кезде диктор таңдалмайды
             currentSpeaker = id;
             [0, 1, 2].forEach(i => {
-                const el = document.getElementById('spk-' + i);
-                el.querySelector('input').checked = (i === id);
-                el.className = (i === id) ? 
-                    'flex items-center justify-between p-3 rounded-xl border border-purple-500/60 bg-purple-950/20 cursor-pointer' : 
-                    'flex items-center justify-between p-3 rounded-xl border border-[#1f293d] bg-slate-900/40 cursor-pointer';
+                const el = $('spk-' + i);
+                if (!el) return;
+                const radio = el.querySelector('input');
+                if (radio) radio.checked = (i === id);
+                el.className = (i === id) ? SPK_ON : SPK_OFF;
             });
         }
 
+        // AI КӨПКЕЙІПКЕРЛІ РЕЖИМ: 3 дикторды құлыптайды / ашады
+        function toggleAiPlay() {
+            isAiMode = !isAiMode;
+            const btn = $('btnAi');
+            if (btn) {
+                btn.setAttribute('aria-pressed', String(isAiMode));
+                ['ring-2', 'ring-purple-300', 'shadow-lg', 'shadow-purple-500/40'].forEach(c => btn.classList.toggle(c, isAiMode));
+            }
+            [0, 1, 2].forEach(i => {
+                const el = $('spk-' + i);
+                if (!el) return;
+                el.classList.toggle('opacity-40', isAiMode);
+                el.classList.toggle('pointer-events-none', isAiMode);
+                const radio = el.querySelector('input');
+                if (radio) radio.disabled = isAiMode;
+            });
+        }
+
+        // ТАҢБА САНАҒЫШЫ
+        function updateCounter() {
+            const ta = $('ttsInput'), c = $('charCounter');
+            if (ta && c) c.textContent = ta.value.length + ' / 2 500 таңба';
+        }
         function insertTag(tag) {
-            const ta = document.getElementById('ttsInput');
+            const ta = $('ttsInput');
+            if (!ta) return;
             ta.focus();
             const start = ta.selectionStart || 0;
             const end = ta.selectionEnd || 0;
-            ta.value = ta.value.substring(0, start) + tag + ta.value.substring(end);
+            const next = ta.value.substring(0, start) + tag + ta.value.substring(end);
+            if (next.length > MAX_LEN) return;
+            ta.value = next;
             ta.selectionStart = ta.selectionEnd = start + tag.length;
-            document.getElementById('charCounter').innerText = ta.value.length + ' / 2 500 таңба';
+            updateCounter();
         }
 
-        const _inp = document.getElementById('ttsInput'); if(_inp) _inp.addEventListener('input', e => {
-            document.getElementById('charCounter').innerText = e.target.value.length + ' / 2 500 таңба';
-        });
+        // БАЛАНС
+        function setBalance(n) {
+            const el = $('userBalanceNum');
+            if (!el || n === undefined || n === null || isNaN(Number(n))) return;
+            if (el.dataset.suffix === undefined) el.dataset.suffix = /таңба/.test(el.textContent) ? ' таңба' : '';
+            el.textContent = Number(n).toLocaleString('ru-RU') + el.dataset.suffix;
+        }
+        async function loadBalance() {
+            if (!getToken()) return;
+            try {
+                const res = await authFetch('/api/user/info');
+                if (!res.ok) return;
+                const d = await readJson(res);
+                let b = d.balance;
+                if (b === undefined && d.user) b = d.user.balance;
+                if (b === undefined && d.data) b = d.data.balance;
+                setBalance(b);
+            } catch (e) { /* баланс жүктелмесе, HTML-дегі мән қалады */ }
+        }
 
+        // СИНТЕЗ
         window.runSynth = async function runSynth() {
-            const ta = document.getElementById('ttsInput');
-            let txt = ta.value.trim();
-            if(!txt) return alert('Мәтін жазыңыз!');
+            const ta = $('ttsInput');
+            if (!ta) return;
+            const txt = ta.value.trim();
+            if (!txt) return alert('Мәтін жазыңыз!');
 
-            let clean = txt.replace(/😄/g, '(happy)').replace(/🥺/g, '(sad)').replace(/😡/g, '(angry)')
-                           .replace(/😨/g, '(fear)').replace(/😲/g, '(surprise)').replace(/😐/g, '(neutral)');
+            let clean = txt;
+            EMOJI_TAGS.forEach(pair => { clean = clean.split(pair[0]).join(pair[1]); });
+            if (clean.length > MAX_LEN) return alert('Мәтін 2 500 таңбадан аспауы керек (эмоция белгілері де есептеледі).');
+            if (!getToken()) { alert('Жүйеге кіріңіз.'); window.location.href = '/'; return; }
 
-            const btn = document.getElementById('btnRun');
-            const orig = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Дыбысталуда...';
-            document.getElementById('audioStatus').innerText = 'Модель жұмыс істеп жатыр...';
+            const speedEl = $('inSpeed'), stepsEl = $('inSteps');
+            let speed = speedEl ? parseFloat(speedEl.value) : 1.0;
+            let steps = stepsEl ? parseInt(stepsEl.value, 10) : 50;
+            speed = Math.min(2.0, Math.max(0.5, isNaN(speed) ? 1.0 : speed));
+            steps = Math.min(100, Math.max(10, isNaN(steps) ? 50 : steps));
+
+            const btn = $('btnRun'), status = $('audioStatus');
+            const orig = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Дыбысталуда...'; }
+            if (status) status.textContent = isAiMode ? 'AI-режиссер рөлдерге бөліп жатыр...' : 'Модель жұмыс істеп жатыр...';
 
             try {
-                const res = await fetch('/api/synthesize', {
+                const res = await authFetch('/api/synthesize', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('unidauys_jwt') || '')},
-                    body: JSON.stringify({
-                        text: clean,
-                        speaker: currentSpeaker,
-                        speed: parseFloat(document.getElementById('inSpeed').value),
-                        steps: parseInt(document.getElementById('inSteps').value)
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: clean, speaker: currentSpeaker, speed: speed, steps: steps, is_ai_mode: isAiMode })
                 });
-                const data = await res.json();
-                if(data.audio_url) {
-                    const p = document.getElementById('mainPlayer');
-                    p.src = data.audio_url + '?t=' + Date.now();
-                    p.play();
-                    document.getElementById('btnWav').href = data.audio_url;
-                    document.getElementById('audioStatus').innerText = 'Дайын болды!';
-                } else {
-                    alert('Қате: ' + (data.detail || 'Нәтиже алынбады'));
+                const data = await readJson(res);
+                const url = data.master_url || data.audio_url;
+                if (!res.ok || !url) {
+                    alert('Қате: ' + errText(data, 'Нәтиже алынбады (HTTP ' + res.status + ')'));
+                    if (status) status.textContent = 'Қате орын алды';
+                    return;
                 }
-            } catch(e) {
-                alert('Қате орын алды: ' + e);
+                const p = $('mainPlayer');
+                if (p) {
+                    p.src = url + '?t=' + Date.now();
+                    const pr = p.play();
+                    if (pr && pr.catch) pr.catch(() => {});
+                }
+                const w = $('btnWav');
+                if (w) { w.href = url; w.setAttribute('download', ''); }
+                if (status) status.textContent = 'Дайын болды!';
+                setBalance(data.new_balance);
+            } catch (e) {
+                if (!e || !e.silent) {
+                    alert('Қате орын алды: ' + (e && e.message ? e.message : e));
+                    if (status) status.textContent = 'Байланыс қатесі';
+                }
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = orig;
+                if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+            }
+        };
+
+        // МЕНІҢ ЖОБАЛАРЫМ
+        function fmtDate(s) {
+            if (!s) return '';
+            const str = String(s);
+            const d = new Date(str.replace(' ', 'T') + (str.length <= 16 ? ':00Z' : 'Z')); // SQLite CURRENT_TIMESTAMP = UTC
+            return isNaN(d.getTime()) ? str : d.toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
+        }
+        async function loadProjects() {
+            const view = $('projectsView');
+            if (!view) return;
+            let list = $('projectsContainerList');
+            if (!list) {
+                list = document.createElement('div');
+                list.id = 'projectsContainerList';
+                list.className = 'w-full space-y-3';
+                view.appendChild(list);
+            }
+            const showMsg = (msg, cls) => {
+                list.textContent = '';
+                const p = document.createElement('p');
+                p.className = cls;
+                p.textContent = msg;
+                list.appendChild(p);
+            };
+            showMsg('Жобалар жүктелуде...', 'text-slate-400 text-center py-6 text-sm');
+            if (!getToken()) { showMsg('Жүйеге кіріңіз.', 'text-amber-400 text-center py-6 text-sm'); return; }
+            try {
+                const res = await authFetch('/api/projects');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await readJson(res);
+                const items = Array.isArray(data) ? data : (data.projects || []);
+                if (items.length === 0) { showMsg('Әзірге жасалған жобалар жоқ.', 'text-slate-500 text-center py-6 text-sm'); return; }
+                list.textContent = '';
+                items.forEach(p => {
+                    const url = (typeof p.master_url === 'string' && p.master_url.charAt(0) === '/') ? p.master_url : '';
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center justify-between gap-3 p-4 bg-slate-900/60 rounded-xl border border-slate-800 hover:border-slate-700 transition';
+                    const left = document.createElement('div');
+                    left.className = 'min-w-0 pr-2';
+                    const title = document.createElement('p');
+                    title.className = 'text-white font-medium text-sm truncate';
+                    title.textContent = p.title || 'Жоба';
+                    const meta = document.createElement('p');
+                    meta.className = 'text-xs text-slate-400 mt-1';
+                    meta.textContent = Number(p.char_count || 0).toLocaleString('ru-RU') + ' таңба • ' + fmtDate(p.created_at);
+                    left.appendChild(title);
+                    left.appendChild(meta);
+                    const right = document.createElement('div');
+                    right.className = 'flex items-center gap-3 shrink-0';
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.preload = 'none';
+                    audio.className = 'h-8 max-w-[200px]';
+                    audio.src = url;
+                    const dl = document.createElement('a');
+                    dl.href = url;
+                    dl.setAttribute('download', '');
+                    dl.className = 'px-3 py-1.5 bg-purple-600/30 text-purple-300 hover:bg-purple-600 hover:text-white rounded-lg text-xs font-semibold transition';
+                    dl.textContent = 'WAV';
+                    right.appendChild(audio);
+                    right.appendChild(dl);
+                    row.appendChild(left);
+                    row.appendChild(right);
+                    list.appendChild(row);
+                });
+            } catch (e) {
+                if (!e || !e.silent) showMsg('Жобаларды алу мүмкін болмады (' + (e && e.message ? e.message : e) + ')', 'text-red-400 text-center py-6 text-sm');
             }
         }
+
+        function initStudio() {
+            const ta = $('ttsInput');
+            if (ta) {
+                ta.setAttribute('maxlength', String(MAX_LEN));
+                ta.addEventListener('input', updateCounter);
+                updateCounter();
+            }
+            // HTML-де таңдалған дикторды күйімен синхрондау
+            let checked;
+            [0, 1, 2].forEach(i => {
+                const el = $('spk-' + i);
+                const r = el && el.querySelector('input');
+                if (r && r.checked) checked = i;
+            });
+            if (checked !== undefined) currentSpeaker = checked; else setSpk(2);
+            loadBalance();
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initStudio);
+        else initStudio();
     </script>
 
 <script>

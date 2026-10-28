@@ -1,15 +1,13 @@
-# Модели и чекпоинты (гигабайты)
-KazEmoTTS/logs/
-KazEmoTTS/checkpts/
-KazEmoTTS/results/
-*.pt
-*.pth
-*.zip
-*.tar.gz
-audio_out/
-
-# Кэш и временные файлы
+.env
+*.wav
+static/audio/generated/*
+kaztts.db
 __pycache__/
 *.pyc
-.ipynb_checkpoints/
-*.bak
+*.pt
+*.pth
+KazEmoTTS/checkpts/*
+KazEmoTTS/logs/*
+__MACOSX/
+results/
+temp/
