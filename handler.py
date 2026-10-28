@@ -20,8 +20,8 @@ def run_tts_synthesis(text, speaker=2, emotion=0, steps=35, output_file="/tmp/ou
         res = synthesize_text(text, speaker=speaker, emotion=emotion, steps=steps, output_file=output_file)
         if res and os.path.exists(output_file):
             return output_file, None
-    except Exception as e:
-        errors.append(f"engine.py error: {traceback.format_exc()}")
+    except Exception:
+        errors.append(f"engine error: {traceback.format_exc()}")
 
     # 2. Прямой запуск через subprocess
     os.makedirs(f"{BASE_DIR}/filelists", exist_ok=True)
@@ -44,7 +44,7 @@ def run_tts_synthesis(text, speaker=2, emotion=0, steps=35, output_file="/tmp/ou
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if p.returncode != 0:
-        errors.append(f"Subprocess returncode {p.returncode}. Stderr: {p.stderr[:500]} | Stdout: {p.stdout[:500]}")
+        errors.append(f"Returncode {p.returncode}: Stderr={p.stderr[:400]} | Stdout={p.stdout[:400]}")
 
     wavs = glob.glob(f"{temp_res_dir}/*.wav")
     if wavs:
